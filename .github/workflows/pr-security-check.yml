@@ -1,0 +1,21 @@
+name: PR Security Check
+
+on:
+  pull_request:
+    branches: [master, main]
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install
+
+      - name: Code Scan
+        run: bun agent/scripts/code-scan.ts .
+        continue-on-error: true
+
+      - name: Dependency Audit
+        run: bun agent/scripts/dep-audit.ts .
+        continue-on-error: true

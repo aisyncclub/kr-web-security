@@ -1,8 +1,15 @@
 # web-security-check
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![OWASP](https://img.shields.io/badge/OWASP-ASVS%20L1-blue)](https://owasp.org/www-project-application-security-verification-standard/)
+[![Bun](https://img.shields.io/badge/runtime-Bun-black)](https://bun.sh)
+[![Claude Code](https://img.shields.io/badge/Claude%20Code-skill-purple)](https://claude.ai/code)
+
+[English](README.en.md) | 한국어
+
 범용 웹 보안 점검 도구 + Claude Code 에이전트
 
-> OWASP ASVS L1 + CWE Top 25 + 국가별 규정 모듈 (KR/EU/US)
+> OWASP ASVS L1 + CWE Top 25 + SDLC 단계별 + 국가별 규정 모듈 (KR/EU/US)
 
 ---
 

@@ -1,0 +1,42 @@
+name: Security Scan
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_url:
+        description: 'URL to scan (optional)'
+        required: false
+        type: string
+      target_path:
+        description: 'Project path to scan (default: current repo)'
+        required: false
+        type: string
+        default: '.'
+
+jobs:
+  header-check:
+    if: inputs.target_url != ''
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install
+      - run: bun agent/scripts/header-check.ts ${{ inputs.target_url }}
+
+  code-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install
+      - name: Code Scan
+        run: bun agent/scripts/code-scan.ts ${{ inputs.target_path || '.' }}
+
+  dep-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install
+      - name: Dependency Audit
+        run: bun agent/scripts/dep-audit.ts ${{ inputs.target_path || '.' }}
