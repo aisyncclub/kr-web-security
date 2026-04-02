@@ -175,6 +175,10 @@ jobs:
 
 ---
 
+## About
+
+Built by **[AI싱크클럽](https://github.com/aisyncclub)** — AI + 커머스 실전 커뮤니티
+
 ## 라이선스
 
 MIT

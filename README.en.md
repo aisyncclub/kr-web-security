@@ -151,6 +151,10 @@ PRs welcome! You can contribute:
 - New compliance modules (JP, AU, BR, etc.)
 - Translations
 
+## About
+
+Built by **[AI Sync Club](https://github.com/aisyncclub)** — AI + Commerce community
+
 ## License
 
 MIT
