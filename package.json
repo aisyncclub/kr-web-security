@@ -1,0 +1,16 @@
+{
+  "name": "kr-web-security",
+  "version": "1.0.0",
+  "description": "대한민국 웹사이트 보안 매뉴얼 + 자동 점검 에이전트",
+  "type": "module",
+  "scripts": {
+    "check:headers": "bun agent/scripts/header-check.ts",
+    "check:code": "bun agent/scripts/code-scan.ts",
+    "check:deps": "bun agent/scripts/dep-audit.ts",
+    "check:full": "bun agent/scripts/report-gen.ts",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "yaml": "^2.4.0"
+  }
+}

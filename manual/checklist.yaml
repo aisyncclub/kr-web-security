@@ -1,0 +1,368 @@
+version: "1.0"
+last_updated: "2026-04-02"
+description: "대한민국 웹사이트 보안 점검 체크리스트 (커뮤니티/발주/고객DB 기준)"
+
+categories:
+  - id: legal
+    name: "법적 의무"
+    items:
+      - id: legal-001
+        title: "개인정보 처리방침 공개"
+        description: "홈페이지 첫 화면 또는 연결화면에 개인정보 처리방침 공개"
+        law_reference: "개인정보보호법 제30조"
+        severity: critical
+        check_type: manual
+        owasp: null
+
+      - id: legal-002
+        title: "수집 동의 절차"
+        description: "수집 항목, 목적, 보유기간 명시 후 명시적 동의 획득"
+        law_reference: "개인정보보호법 제15조, 제22조"
+        severity: critical
+        check_type: manual
+        owasp: null
+
+      - id: legal-003
+        title: "주민번호 수집 제한"
+        description: "법령에 근거 없는 주민번호 수집 금지"
+        law_reference: "개인정보보호법 제24조의2"
+        severity: critical
+        check_type: code_scan
+        pattern: "주민.*번호|resident.*number|ssn"
+        owasp: null
+
+      - id: legal-004
+        title: "유출 신고 체계"
+        description: "1천명 이상 유출 시 72시간 내 KISA 신고 체계 수립"
+        law_reference: "개인정보보호법 제34조"
+        severity: critical
+        check_type: manual
+        owasp: null
+
+      - id: legal-005
+        title: "거래기록 보존"
+        description: "계약/청약철회 5년, 대금결제 5년, 소비자 불만 3년 보존"
+        law_reference: "전자상거래법 제6조"
+        severity: high
+        check_type: manual
+        owasp: null
+
+      - id: legal-006
+        title: "사이버몰 운영자 정보 표시"
+        description: "상호, 대표자, 주소, 전화번호, 사업자등록번호 표시"
+        law_reference: "전자상거래법 제13조"
+        severity: high
+        check_type: manual
+        owasp: null
+
+  - id: auth
+    name: "인증/접근 제어"
+    items:
+      - id: auth-001
+        title: "비밀번호 안전한 해시"
+        description: "bcrypt 또는 argon2로 비밀번호 해시 (MD5/SHA1 금지)"
+        severity: critical
+        check_type: code_scan
+        pattern: "createHash\\(['\"]md5|createHash\\(['\"]sha1|MD5\\(|SHA1\\("
+        owasp: "A02:2021"
+
+      - id: auth-002
+        title: "HTTPS 강제"
+        description: "HTTP → HTTPS 리다이렉트 적용"
+        severity: critical
+        check_type: http_header
+        header: null
+        expected: "301 redirect to https"
+        owasp: "A02:2021"
+
+      - id: auth-003
+        title: "세션 타임아웃"
+        description: "30분 비활성 시 자동 로그아웃"
+        severity: high
+        check_type: manual
+        owasp: "A07:2021"
+
+      - id: auth-004
+        title: "로그인 실패 제한"
+        description: "5회 실패 시 계정 잠금 또는 딜레이 적용"
+        severity: high
+        check_type: manual
+        owasp: "A07:2021"
+
+      - id: auth-005
+        title: "관리자 페이지 접근 제한"
+        description: "IP 화이트리스트 또는 2FA 적용"
+        severity: critical
+        check_type: manual
+        owasp: "A01:2021"
+
+      - id: auth-006
+        title: "CSRF 토큰"
+        description: "모든 상태 변경 폼에 CSRF 토큰 적용"
+        severity: critical
+        check_type: code_scan
+        pattern: "method=['\"]POST['\"](?!.*csrf|_token|_csrf)"
+        owasp: "A01:2021"
+
+      - id: auth-007
+        title: "쿠키 보안 플래그"
+        description: "Secure + HttpOnly + SameSite 쿠키 플래그 설정"
+        severity: high
+        check_type: http_header
+        header: "Set-Cookie"
+        expected: "Secure; HttpOnly; SameSite"
+        owasp: "A05:2021"
+
+  - id: injection
+    name: "인젝션/봇 방어"
+    items:
+      - id: inj-001
+        title: "SQL Injection 방지"
+        description: "Prepared Statement 사용, 문자열 연결 쿼리 금지"
+        severity: critical
+        check_type: code_scan
+        pattern: "\\$\\{.*\\}.*(?:SELECT|INSERT|UPDATE|DELETE|WHERE)|query\\s*\\(\\s*[`'\"].*\\+|execute\\s*\\(\\s*[`'\"].*\\$"
+        owasp: "A03:2021"
+
+      - id: inj-002
+        title: "XSS 방지"
+        description: "사용자 입력 이스케이프, innerHTML 사용 지양"
+        severity: critical
+        check_type: code_scan
+        pattern: "innerHTML\\s*=|dangerouslySetInnerHTML|document\\.write\\("
+        owasp: "A03:2021"
+
+      - id: inj-003
+        title: "Command Injection 방지"
+        description: "사용자 입력을 쉘 명령에 직접 전달 금지"
+        severity: critical
+        check_type: code_scan
+        pattern: "exec\\(.*\\$\\{|spawn\\(.*\\$\\{|child_process.*\\$\\{"
+        owasp: "A03:2021"
+
+      - id: inj-004
+        title: "Rate Limiting"
+        description: "IP당 분당 요청 수 제한"
+        severity: high
+        check_type: manual
+        owasp: "A05:2021"
+
+      - id: inj-005
+        title: "reCAPTCHA 적용"
+        description: "로그인, 회원가입, 주문 폼에 reCAPTCHA 적용"
+        severity: medium
+        check_type: manual
+        owasp: "A07:2021"
+
+      - id: inj-006
+        title: "SSRF 방지"
+        description: "사용자 입력 URL로 서버 측 요청 시 화이트리스트 검증"
+        severity: high
+        check_type: code_scan
+        pattern: "fetch\\(.*req\\.|fetch\\(.*params\\.|fetch\\(.*query\\."
+        owasp: "A10:2021"
+
+  - id: db_security
+    name: "고객 DB 보안"
+    items:
+      - id: db-001
+        title: "개인정보 암호화"
+        description: "전화번호, 이메일, 주소 등 AES-256 암호화 저장"
+        severity: critical
+        check_type: manual
+        owasp: "A02:2021"
+
+      - id: db-002
+        title: "결제정보 직접 저장 금지"
+        description: "카드번호 등 PCI-DSS 범위 데이터는 PG사 토큰만 저장"
+        severity: critical
+        check_type: code_scan
+        pattern: "card_number|cardNumber|cvv|credit_card"
+        owasp: "A02:2021"
+
+      - id: db-003
+        title: "DB 접근 최소 권한"
+        description: "애플리케이션 계정에 SELECT/INSERT/UPDATE만 부여, DROP 금지"
+        severity: high
+        check_type: manual
+        owasp: "A01:2021"
+
+      - id: db-004
+        title: "DB 접근 로그 보관"
+        description: "DB 접근 로그 90일 이상 보관"
+        severity: high
+        check_type: manual
+        owasp: "A09:2021"
+
+      - id: db-005
+        title: "백업 암호화"
+        description: "DB 백업 파일 암호화 저장"
+        severity: high
+        check_type: manual
+        owasp: "A02:2021"
+
+  - id: server
+    name: "서버/인프라"
+    items:
+      - id: srv-001
+        title: "HSTS 헤더"
+        description: "Strict-Transport-Security 헤더 설정"
+        severity: high
+        check_type: http_header
+        header: "Strict-Transport-Security"
+        expected: "max-age=31536000"
+        owasp: "A05:2021"
+
+      - id: srv-002
+        title: "CSP 헤더"
+        description: "Content-Security-Policy 헤더 설정"
+        severity: high
+        check_type: http_header
+        header: "Content-Security-Policy"
+        expected: "default-src"
+        owasp: "A05:2021"
+
+      - id: srv-003
+        title: "X-Frame-Options"
+        description: "클릭재킹 방지 헤더"
+        severity: medium
+        check_type: http_header
+        header: "X-Frame-Options"
+        expected: "DENY|SAMEORIGIN"
+        owasp: "A05:2021"
+
+      - id: srv-004
+        title: "X-Content-Type-Options"
+        description: "MIME 스니핑 방지"
+        severity: medium
+        check_type: http_header
+        header: "X-Content-Type-Options"
+        expected: "nosniff"
+        owasp: "A05:2021"
+
+      - id: srv-005
+        title: "불필요 포트 차단"
+        description: "22(SSH IP제한), 80, 443 외 포트 닫기"
+        severity: high
+        check_type: manual
+        owasp: "A05:2021"
+
+      - id: srv-006
+        title: "SSH 키 인증"
+        description: "패스워드 인증 비활성화, 키 인증만 허용"
+        severity: high
+        check_type: manual
+        owasp: "A07:2021"
+
+      - id: srv-007
+        title: "TLS 1.2 이상"
+        description: "TLS 1.0/1.1 비활성화"
+        severity: high
+        check_type: manual
+        owasp: "A02:2021"
+
+  - id: monitoring
+    name: "모니터링/로깅"
+    items:
+      - id: mon-001
+        title: "로그인 실패 로깅"
+        description: "로그인 실패 시 IP, User-Agent, 시간 기록"
+        severity: high
+        check_type: manual
+        owasp: "A09:2021"
+
+      - id: mon-002
+        title: "관리자 활동 로깅"
+        description: "관리자 기능 실행(누가, 언제, 무엇을) 기록"
+        severity: high
+        check_type: manual
+        owasp: "A09:2021"
+
+      - id: mon-003
+        title: "이상 행동 알림"
+        description: "동일 IP 10회 이상 로그인 실패 시 알림"
+        severity: high
+        check_type: manual
+        owasp: "A09:2021"
+
+      - id: mon-004
+        title: "대량 데이터 접근 로깅"
+        description: "엑셀 다운로드 등 대량 데이터 조회 기록"
+        severity: high
+        check_type: manual
+        owasp: "A09:2021"
+
+  - id: payment
+    name: "결제/발주 특화"
+    items:
+      - id: pay-001
+        title: "발주서 개인정보 보호"
+        description: "발주서 엑셀에 개인정보 포함 시 비밀번호 보호"
+        severity: medium
+        check_type: manual
+        owasp: null
+
+      - id: pay-002
+        title: "API 키 환경변수 관리"
+        description: "외부 업체 API 키는 .env에만 저장, Git 커밋 금지"
+        severity: critical
+        check_type: code_scan
+        pattern: "api[_-]?key\\s*[:=]\\s*['\"][a-zA-Z0-9]|password\\s*[:=]\\s*['\"][^'\"]{6,}|secret\\s*[:=]\\s*['\"][a-zA-Z0-9]"
+        owasp: "A02:2021"
+
+      - id: pay-003
+        title: "메일 수신자 화이트리스트"
+        description: "등록된 이메일 주소 외 자동 발송 금지"
+        severity: medium
+        check_type: manual
+        owasp: null
+
+  - id: ai_automation
+    name: "AI 자동화 보안"
+    items:
+      - id: ai-001
+        title: "Prompt Injection 방어"
+        description: "외부 콘텐츠를 AI 명령으로 처리하지 않음"
+        severity: high
+        check_type: manual
+        owasp: "A08:2021"
+
+      - id: ai-002
+        title: "봇 탐지 서비스 접근 제한"
+        description: "reCAPTCHA/봇 탐지 적용 서비스에 프로그래매틱 접근 금지"
+        severity: high
+        check_type: manual
+        owasp: null
+
+      - id: ai-003
+        title: "AI 출력 검증"
+        description: "AI가 생성한 수치/지시는 원본 확인 후 사용"
+        severity: medium
+        check_type: manual
+        owasp: "A08:2021"
+
+  - id: dependency
+    name: "의존성 관리"
+    items:
+      - id: dep-001
+        title: "알려진 취약점 패키지 없음"
+        description: "npm audit 또는 bun audit 결과 critical/high 없음"
+        severity: critical
+        check_type: dependency
+        owasp: "A06:2021"
+
+      - id: dep-002
+        title: "eval 사용 금지"
+        description: "eval(), new Function() 사용 금지"
+        severity: high
+        check_type: code_scan
+        pattern: "\\beval\\s*\\(|new\\s+Function\\s*\\("
+        owasp: "A03:2021"
+
+      - id: dep-003
+        title: "안전한 랜덤 생성"
+        description: "보안 목적으로 Math.random() 대신 crypto.randomUUID() 사용"
+        severity: medium
+        check_type: code_scan
+        pattern: "Math\\.random\\(\\)"
+        owasp: "A02:2021"
