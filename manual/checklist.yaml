@@ -1,136 +1,120 @@
-version: "1.0"
-last_updated: "2026-04-02"
-description: "대한민국 웹사이트 보안 점검 체크리스트 (커뮤니티/발주/고객DB 기준)"
+version: "2.0"
+last_updated: "2026-04-03"
+description: "범용 웹 보안 점검 체크리스트 (OWASP ASVS L1 + CWE Top 25 기반)"
+
+# 국가별 규정은 compliance/ 모듈로 분리
+compliance_modules:
+  - kr   # 한국: 개인정보보호법, 전자상거래법
+  - eu   # EU: GDPR
+  - us   # 미국: CCPA
 
 categories:
-  - id: legal
-    name: "법적 의무"
+  # ─────────────────────────────────────────
+  # OWASP A01:2021 Broken Access Control
+  # ─────────────────────────────────────────
+  - id: access_control
+    name: "접근 제어 (A01)"
+    owasp: "A01:2021"
     items:
-      - id: legal-001
-        title: "개인정보 처리방침 공개"
-        description: "홈페이지 첫 화면 또는 연결화면에 개인정보 처리방침 공개"
-        law_reference: "개인정보보호법 제30조"
+      - id: ac-001
+        title: "최소 권한 원칙"
+        description: "사용자/서비스 계정에 필요한 최소 권한만 부여"
         severity: critical
         check_type: manual
-        owasp: null
 
-      - id: legal-002
-        title: "수집 동의 절차"
-        description: "수집 항목, 목적, 보유기간 명시 후 명시적 동의 획득"
-        law_reference: "개인정보보호법 제15조, 제22조"
-        severity: critical
-        check_type: manual
-        owasp: null
-
-      - id: legal-003
-        title: "주민번호 수집 제한"
-        description: "법령에 근거 없는 주민번호 수집 금지"
-        law_reference: "개인정보보호법 제24조의2"
-        severity: critical
-        check_type: code_scan
-        pattern: "주민.*번호|resident.*number|ssn"
-        owasp: null
-
-      - id: legal-004
-        title: "유출 신고 체계"
-        description: "1천명 이상 유출 시 72시간 내 KISA 신고 체계 수립"
-        law_reference: "개인정보보호법 제34조"
-        severity: critical
-        check_type: manual
-        owasp: null
-
-      - id: legal-005
-        title: "거래기록 보존"
-        description: "계약/청약철회 5년, 대금결제 5년, 소비자 불만 3년 보존"
-        law_reference: "전자상거래법 제6조"
-        severity: high
-        check_type: manual
-        owasp: null
-
-      - id: legal-006
-        title: "사이버몰 운영자 정보 표시"
-        description: "상호, 대표자, 주소, 전화번호, 사업자등록번호 표시"
-        law_reference: "전자상거래법 제13조"
-        severity: high
-        check_type: manual
-        owasp: null
-
-  - id: auth
-    name: "인증/접근 제어"
-    items:
-      - id: auth-001
-        title: "비밀번호 안전한 해시"
-        description: "bcrypt 또는 argon2로 비밀번호 해시 (MD5/SHA1 금지)"
-        severity: critical
-        check_type: code_scan
-        pattern: "createHash\\(['\"]md5|createHash\\(['\"]sha1|MD5\\(|SHA1\\("
-        owasp: "A02:2021"
-
-      - id: auth-002
-        title: "HTTPS 강제"
-        description: "HTTP → HTTPS 리다이렉트 적용"
-        severity: critical
-        check_type: http_header
-        header: null
-        expected: "301 redirect to https"
-        owasp: "A02:2021"
-
-      - id: auth-003
-        title: "세션 타임아웃"
-        description: "30분 비활성 시 자동 로그아웃"
-        severity: high
-        check_type: manual
-        owasp: "A07:2021"
-
-      - id: auth-004
-        title: "로그인 실패 제한"
-        description: "5회 실패 시 계정 잠금 또는 딜레이 적용"
-        severity: high
-        check_type: manual
-        owasp: "A07:2021"
-
-      - id: auth-005
+      - id: ac-002
         title: "관리자 페이지 접근 제한"
-        description: "IP 화이트리스트 또는 2FA 적용"
+        description: "IP 화이트리스트, VPN, 또는 2FA 적용"
         severity: critical
         check_type: manual
-        owasp: "A01:2021"
 
-      - id: auth-006
+      - id: ac-003
         title: "CSRF 토큰"
-        description: "모든 상태 변경 폼에 CSRF 토큰 적용"
+        description: "모든 상태 변경 요청에 CSRF 토큰 적용"
         severity: critical
         check_type: code_scan
         pattern: "method=['\"]POST['\"](?!.*csrf|_token|_csrf)"
-        owasp: "A01:2021"
 
-      - id: auth-007
-        title: "쿠키 보안 플래그"
-        description: "Secure + HttpOnly + SameSite 쿠키 플래그 설정"
+      - id: ac-004
+        title: "경로 순회 방지"
+        description: "사용자 입력으로 파일 경로 접근 시 정규화 검증"
+        severity: critical
+        check_type: code_scan
+        pattern: "path\\.join\\(.*req\\.|readFile\\(.*req\\.|readFileSync\\(.*req\\."
+
+      - id: ac-005
+        title: "IDOR 방지"
+        description: "리소스 접근 시 소유권 검증 (ID 직접 노출 금지)"
         severity: high
-        check_type: http_header
-        header: "Set-Cookie"
-        expected: "Secure; HttpOnly; SameSite"
-        owasp: "A05:2021"
+        check_type: manual
 
+  # ─────────────────────────────────────────
+  # OWASP A02:2021 Cryptographic Failures
+  # ─────────────────────────────────────────
+  - id: crypto
+    name: "암호화 (A02)"
+    owasp: "A02:2021"
+    items:
+      - id: cr-001
+        title: "비밀번호 안전한 해시"
+        description: "bcrypt/argon2/scrypt 사용 (MD5/SHA1 금지)"
+        severity: critical
+        check_type: code_scan
+        pattern: "createHash\\(['\"]md5|createHash\\(['\"]sha1|MD5\\(|SHA1\\("
+
+      - id: cr-002
+        title: "HTTPS 강제"
+        description: "HTTP→HTTPS 301 리다이렉트"
+        severity: critical
+        check_type: http_header
+        expected: "301 redirect to https"
+
+      - id: cr-003
+        title: "TLS 1.2 이상"
+        description: "TLS 1.0/1.1 비활성화"
+        severity: high
+        check_type: manual
+
+      - id: cr-004
+        title: "민감 데이터 암호화 저장"
+        description: "PII, 결제정보 등 AES-256-GCM 이상으로 암호화"
+        severity: critical
+        check_type: manual
+
+      - id: cr-005
+        title: "하드코딩된 시크릿 금지"
+        description: "API 키, 비밀번호 등 소스코드에 직접 기록 금지"
+        severity: critical
+        check_type: code_scan
+        pattern: "api[_-]?key\\s*[:=]\\s*['\"][a-zA-Z0-9]{16,}|password\\s*[:=]\\s*['\"][^'\"]{6,}|secret\\s*[:=]\\s*['\"][a-zA-Z0-9]{16,}"
+
+      - id: cr-006
+        title: "안전한 랜덤 생성"
+        description: "보안 목적으로 Math.random() 대신 crypto API 사용"
+        severity: medium
+        check_type: code_scan
+        pattern: "Math\\.random\\(\\)"
+
+  # ─────────────────────────────────────────
+  # OWASP A03:2021 Injection
+  # ─────────────────────────────────────────
   - id: injection
-    name: "인젝션/봇 방어"
+    name: "인젝션 (A03)"
+    owasp: "A03:2021"
     items:
       - id: inj-001
         title: "SQL Injection 방지"
         description: "Prepared Statement 사용, 문자열 연결 쿼리 금지"
         severity: critical
         check_type: code_scan
-        pattern: "\\$\\{.*\\}.*(?:SELECT|INSERT|UPDATE|DELETE|WHERE)|query\\s*\\(\\s*[`'\"].*\\+|execute\\s*\\(\\s*[`'\"].*\\$"
-        owasp: "A03:2021"
+        pattern: "\\$\\{.*\\}.*(?:SELECT|INSERT|UPDATE|DELETE|WHERE)|query\\s*\\(\\s*[`'\"].*\\+"
 
       - id: inj-002
         title: "XSS 방지"
-        description: "사용자 입력 이스케이프, innerHTML 사용 지양"
+        description: "사용자 입력 이스케이프, innerHTML 사용 금지"
         severity: critical
         check_type: code_scan
         pattern: "innerHTML\\s*=|dangerouslySetInnerHTML|document\\.write\\("
-        owasp: "A03:2021"
 
       - id: inj-003
         title: "Command Injection 방지"
@@ -138,306 +122,247 @@ categories:
         severity: critical
         check_type: code_scan
         pattern: "exec\\(.*\\$\\{|spawn\\(.*\\$\\{|child_process.*\\$\\{"
-        owasp: "A03:2021"
 
       - id: inj-004
-        title: "Rate Limiting"
-        description: "IP당 분당 요청 수 제한"
-        severity: high
-        check_type: manual
-        owasp: "A05:2021"
-
-      - id: inj-005
-        title: "reCAPTCHA 적용"
-        description: "로그인, 회원가입, 주문 폼에 reCAPTCHA 적용"
-        severity: medium
-        check_type: manual
-        owasp: "A07:2021"
-
-      - id: inj-006
         title: "SSRF 방지"
         description: "사용자 입력 URL로 서버 측 요청 시 화이트리스트 검증"
         severity: high
         check_type: code_scan
         pattern: "fetch\\(.*req\\.|fetch\\(.*params\\.|fetch\\(.*query\\."
-        owasp: "A10:2021"
 
-  - id: db_security
-    name: "고객 DB 보안"
-    items:
-      - id: db-001
-        title: "개인정보 암호화"
-        description: "전화번호, 이메일, 주소 등 AES-256 암호화 저장"
-        severity: critical
-        check_type: manual
-        owasp: "A02:2021"
+      - id: inj-005
+        title: "eval 사용 금지"
+        description: "eval(), new Function() 사용 금지"
+        severity: high
+        check_type: code_scan
+        pattern: "\\beval\\s*\\(|new\\s+Function\\s*\\("
 
-      - id: db-002
-        title: "결제정보 직접 저장 금지"
-        description: "카드번호 등 PCI-DSS 범위 데이터는 PG사 토큰만 저장"
+      - id: inj-006
+        title: "HTML Sanitizer 적용"
+        description: "사용자 HTML 입력 허용 시 서버 측 sanitizer 적용"
         severity: critical
         check_type: code_scan
-        pattern: "card_number|cardNumber|cvv|credit_card"
-        owasp: "A02:2021"
+        pattern: "innerHTML\\s*=|v-html|dangerouslySetInnerHTML"
 
-      - id: db-003
-        title: "DB 접근 최소 권한"
-        description: "애플리케이션 계정에 SELECT/INSERT/UPDATE만 부여, DROP 금지"
-        severity: high
-        check_type: manual
-        owasp: "A01:2021"
-
-      - id: db-004
-        title: "DB 접근 로그 보관"
-        description: "DB 접근 로그 90일 이상 보관"
-        severity: high
-        check_type: manual
-        owasp: "A09:2021"
-
-      - id: db-005
-        title: "백업 암호화"
-        description: "DB 백업 파일 암호화 저장"
-        severity: high
-        check_type: manual
-        owasp: "A02:2021"
-
-  - id: server
-    name: "서버/인프라"
+  # ─────────────────────────────────────────
+  # OWASP A05:2021 Security Misconfiguration
+  # ─────────────────────────────────────────
+  - id: headers
+    name: "보안 헤더 (A05)"
+    owasp: "A05:2021"
     items:
-      - id: srv-001
-        title: "HSTS 헤더"
-        description: "Strict-Transport-Security 헤더 설정"
+      - id: hdr-001
+        title: "HSTS"
+        description: "Strict-Transport-Security: max-age=31536000"
         severity: high
         check_type: http_header
         header: "Strict-Transport-Security"
         expected: "max-age=31536000"
-        owasp: "A05:2021"
 
-      - id: srv-002
-        title: "CSP 헤더"
-        description: "Content-Security-Policy 헤더 설정"
+      - id: hdr-002
+        title: "CSP"
+        description: "Content-Security-Policy 설정"
         severity: high
         check_type: http_header
         header: "Content-Security-Policy"
         expected: "default-src"
-        owasp: "A05:2021"
 
-      - id: srv-003
+      - id: hdr-003
         title: "X-Frame-Options"
-        description: "클릭재킹 방지 헤더"
+        description: "클릭재킹 방지"
         severity: medium
         check_type: http_header
         header: "X-Frame-Options"
         expected: "DENY|SAMEORIGIN"
-        owasp: "A05:2021"
 
-      - id: srv-004
+      - id: hdr-004
         title: "X-Content-Type-Options"
         description: "MIME 스니핑 방지"
         severity: medium
         check_type: http_header
         header: "X-Content-Type-Options"
         expected: "nosniff"
-        owasp: "A05:2021"
 
-      - id: srv-005
-        title: "불필요 포트 차단"
-        description: "22(SSH IP제한), 80, 443 외 포트 닫기"
+      - id: hdr-005
+        title: "Referrer-Policy"
+        description: "리퍼러 정보 제한"
+        severity: medium
+        check_type: http_header
+        header: "Referrer-Policy"
+        expected: "strict-origin-when-cross-origin"
+
+      - id: hdr-006
+        title: "Permissions-Policy"
+        description: "브라우저 기능 접근 제한 (카메라, 마이크 등)"
+        severity: medium
+        check_type: http_header
+        header: "Permissions-Policy"
+        expected: "설정됨"
+
+      - id: hdr-007
+        title: "쿠키 보안 플래그"
+        description: "Secure; HttpOnly; SameSite 설정"
         severity: high
-        check_type: manual
-        owasp: "A05:2021"
+        check_type: http_header
+        header: "Set-Cookie"
+        expected: "Secure; HttpOnly; SameSite"
 
-      - id: srv-006
-        title: "SSH 키 인증"
-        description: "패스워드 인증 비활성화, 키 인증만 허용"
+      - id: hdr-008
+        title: "Server 헤더 제거"
+        description: "서버 소프트웨어 정보 노출 방지"
+        severity: low
+        check_type: http_header
+        header: "Server"
+        expected: "제거 또는 최소화"
+
+      - id: hdr-009
+        title: "X-Powered-By 제거"
+        description: "프레임워크 정보 노출 방지"
+        severity: low
+        check_type: http_header
+        header: "X-Powered-By"
+        expected: "제거"
+
+      - id: hdr-010
+        title: "CORS 설정"
+        description: "Access-Control-Allow-Origin에 와일드카드(*) 금지"
         severity: high
-        check_type: manual
-        owasp: "A07:2021"
+        check_type: http_header
+        header: "Access-Control-Allow-Origin"
+        expected: "특정 도메인만 허용"
 
-      - id: srv-007
-        title: "TLS 1.2 이상"
-        description: "TLS 1.0/1.1 비활성화"
-        severity: high
-        check_type: manual
-        owasp: "A02:2021"
-
-  - id: monitoring
-    name: "모니터링/로깅"
+  # ─────────────────────────────────────────
+  # OWASP A06:2021 Vulnerable Components
+  # ─────────────────────────────────────────
+  - id: dependency
+    name: "의존성 (A06)"
+    owasp: "A06:2021"
     items:
-      - id: mon-001
-        title: "로그인 실패 로깅"
-        description: "로그인 실패 시 IP, User-Agent, 시간 기록"
+      - id: dep-001
+        title: "알려진 취약점 없음"
+        description: "npm/bun audit 결과 critical/high 없음"
+        severity: critical
+        check_type: dependency
+
+      - id: dep-002
+        title: "의존성 정기 업데이트"
+        description: "분기별 의존성 업데이트, lockfile 유지"
+        severity: medium
+        check_type: manual
+
+  # ─────────────────────────────────────────
+  # OWASP A07:2021 Auth Failures
+  # ─────────────────────────────────────────
+  - id: auth
+    name: "인증 (A07)"
+    owasp: "A07:2021"
+    items:
+      - id: auth-001
+        title: "로그인 실패 제한"
+        description: "5회 실패 시 계정 잠금 또는 딜레이 적용"
         severity: high
         check_type: manual
-        owasp: "A09:2021"
 
-      - id: mon-002
+      - id: auth-002
+        title: "Rate Limiting"
+        description: "IP당 분당 요청 수 제한"
+        severity: high
+        check_type: manual
+
+      - id: auth-003
+        title: "세션 타임아웃"
+        description: "비활성 시 자동 로그아웃"
+        severity: medium
+        check_type: manual
+
+      - id: auth-004
+        title: "봇 방어"
+        description: "로그인/회원가입에 CAPTCHA 적용"
+        severity: medium
+        check_type: manual
+
+  # ─────────────────────────────────────────
+  # OWASP A09:2021 Logging Failures
+  # ─────────────────────────────────────────
+  - id: logging
+    name: "로깅/모니터링 (A09)"
+    owasp: "A09:2021"
+    items:
+      - id: log-001
+        title: "인증 이벤트 로깅"
+        description: "로그인 성공/실패 IP, User-Agent, 시간 기록"
+        severity: high
+        check_type: manual
+
+      - id: log-002
         title: "관리자 활동 로깅"
         description: "관리자 기능 실행(누가, 언제, 무엇을) 기록"
         severity: high
         check_type: manual
-        owasp: "A09:2021"
 
-      - id: mon-003
+      - id: log-003
         title: "이상 행동 알림"
-        description: "동일 IP 10회 이상 로그인 실패 시 알림"
+        description: "동일 IP 반복 실패, 대량 데이터 접근 시 알림"
         severity: high
         check_type: manual
-        owasp: "A09:2021"
 
-      - id: mon-004
-        title: "대량 데이터 접근 로깅"
-        description: "엑셀 다운로드 등 대량 데이터 조회 기록"
-        severity: high
-        check_type: manual
-        owasp: "A09:2021"
-
-  - id: payment
-    name: "결제/발주 특화"
-    items:
-      - id: pay-001
-        title: "발주서 개인정보 보호"
-        description: "발주서 엑셀에 개인정보 포함 시 비밀번호 보호"
-        severity: medium
-        check_type: manual
-        owasp: null
-
-      - id: pay-002
-        title: "API 키 환경변수 관리"
-        description: "외부 업체 API 키는 .env에만 저장, Git 커밋 금지"
+      - id: log-004
+        title: "로그에 민감정보 미포함"
+        description: "로그에 비밀번호, 토큰, PII 기록 금지"
         severity: critical
         check_type: code_scan
-        pattern: "api[_-]?key\\s*[:=]\\s*['\"][a-zA-Z0-9]|password\\s*[:=]\\s*['\"][^'\"]{6,}|secret\\s*[:=]\\s*['\"][a-zA-Z0-9]"
-        owasp: "A02:2021"
+        pattern: "console\\.log\\(.*password|console\\.log\\(.*token|console\\.log\\(.*secret"
 
-      - id: pay-003
-        title: "메일 수신자 화이트리스트"
-        description: "등록된 이메일 주소 외 자동 발송 금지"
-        severity: medium
-        check_type: manual
-        owasp: null
-
-  - id: ai_automation
-    name: "AI 자동화 보안"
-    items:
-      - id: ai-001
-        title: "Prompt Injection 방어"
-        description: "외부 콘텐츠를 AI 명령으로 처리하지 않음"
-        severity: high
-        check_type: manual
-        owasp: "A08:2021"
-
-      - id: ai-002
-        title: "봇 탐지 서비스 접근 제한"
-        description: "reCAPTCHA/봇 탐지 적용 서비스에 프로그래매틱 접근 금지"
-        severity: high
-        check_type: manual
-        owasp: null
-
-      - id: ai-003
-        title: "AI 출력 검증"
-        description: "AI가 생성한 수치/지시는 원본 확인 후 사용"
-        severity: medium
-        check_type: manual
-        owasp: "A08:2021"
-
+  # ─────────────────────────────────────────
+  # 파일 업로드
+  # ─────────────────────────────────────────
   - id: upload
-    name: "파일 업로드 보안"
+    name: "파일 업로드"
     items:
-      - id: upload-001
+      - id: up-001
         title: "확장자 화이트리스트"
-        description: "허용된 확장자만 업로드 가능 (서버 측 검증)"
+        description: "허용된 확장자만 업로드 (서버 측 검증)"
         severity: critical
-        check_type: code_scan
-        pattern: "multer|upload|formidable|busboy"
-        owasp: "A03:2021"
+        check_type: manual
 
-      - id: upload-002
+      - id: up-002
         title: "매직바이트 검증"
-        description: "파일 확장자뿐 아니라 실제 파일 헤더(매직바이트)로 타입 검증"
+        description: "파일 헤더로 실제 타입 검증"
         severity: high
         check_type: manual
-        owasp: "A04:2021"
 
-      - id: upload-003
+      - id: up-003
         title: "업로드 디렉토리 실행 권한 제거"
-        description: "업로드 폴더에서 스크립트 실행 불가 설정"
+        description: "업로드 폴더에서 스크립트 실행 불가"
         severity: critical
         check_type: manual
-        owasp: "A05:2021"
 
-      - id: upload-004
+      - id: up-004
         title: "파일 크기 제한"
         description: "업로드 파일 크기 제한 (DoS 방지)"
         severity: medium
         check_type: manual
-        owasp: "A05:2021"
 
-  - id: community
-    name: "커뮤니티 특화"
+  # ─────────────────────────────────────────
+  # CI/CD 보안
+  # ─────────────────────────────────────────
+  - id: cicd
+    name: "CI/CD 보안"
     items:
-      - id: comm-001
-        title: "HTML Sanitizer 적용"
-        description: "사용자 HTML 입력 시 DOMPurify/sanitize-html 서버 측 적용"
+      - id: ci-001
+        title: "시크릿 스캐닝"
+        description: "pre-commit hook 또는 CI에서 gitleaks/trufflehog 실행"
         severity: critical
-        check_type: code_scan
-        pattern: "innerHTML\\s*=|v-html|dangerouslySetInnerHTML"
-        owasp: "A03:2021"
+        check_type: manual
 
-      - id: comm-002
-        title: "Cloudflare Turnstile 또는 reCAPTCHA"
-        description: "회원가입/로그인/게시글 작성에 봇 방어 적용"
+      - id: ci-002
+        title: "의존성 자동 점검"
+        description: "CI 파이프라인에 SCA(Trivy/Snyk) 통합"
         severity: high
         check_type: manual
-        owasp: "A07:2021"
 
-  - id: b2b
-    name: "B2B 발주 특화"
-    items:
-      - id: b2b-001
-        title: "거래처별 계정 분리"
-        description: "벤더사마다 별도 계정 발급, 공유 계정 금지"
+      - id: ci-003
+        title: "SAST 자동 실행"
+        description: "PR마다 Semgrep 또는 코드 스캔 자동 실행"
         severity: high
         check_type: manual
-        owasp: "A01:2021"
-
-      - id: b2b-002
-        title: "발주서 개인정보 마스킹"
-        description: "배송 완료 후 수령인 정보 마스킹 처리"
-        severity: medium
-        check_type: manual
-        owasp: null
-
-      - id: b2b-003
-        title: "API 키 회전"
-        description: "외부 업체 API 키 분기별 회전, gitleaks로 커밋 검사"
-        severity: high
-        check_type: code_scan
-        pattern: "APIKEY|API_KEY|apikey|api_key|SECRET_KEY|secretKey"
-        owasp: "A02:2021"
-
-  - id: dependency
-    name: "의존성 관리"
-    items:
-      - id: dep-001
-        title: "알려진 취약점 패키지 없음"
-        description: "npm audit 또는 bun audit 결과 critical/high 없음"
-        severity: critical
-        check_type: dependency
-        owasp: "A06:2021"
-
-      - id: dep-002
-        title: "eval 사용 금지"
-        description: "eval(), new Function() 사용 금지"
-        severity: high
-        check_type: code_scan
-        pattern: "\\beval\\s*\\(|new\\s+Function\\s*\\("
-        owasp: "A03:2021"
-
-      - id: dep-003
-        title: "안전한 랜덤 생성"
-        description: "보안 목적으로 Math.random() 대신 crypto.randomUUID() 사용"
-        severity: medium
-        check_type: code_scan
-        pattern: "Math\\.random\\(\\)"
-        owasp: "A02:2021"

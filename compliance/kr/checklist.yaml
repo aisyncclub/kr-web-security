@@ -1,0 +1,70 @@
+module: kr
+name: "대한민국 (PIPA + 전자상거래법)"
+description: "개인정보보호법 안전성확보조치 기준 + 전자상거래법 보안 의무"
+
+items:
+  - id: kr-001
+    title: "개인정보 처리방침 공개"
+    description: "홈페이지 첫 화면에 개인정보 처리방침 공개"
+    law: "개인정보보호법 제30조"
+    severity: critical
+    check_type: manual
+    penalty: "과태료 최대 3천만원"
+
+  - id: kr-002
+    title: "수집 동의 절차"
+    description: "수집 항목, 목적, 보유기간 명시 후 동의"
+    law: "개인정보보호법 제15조, 제22조"
+    severity: critical
+    check_type: manual
+
+  - id: kr-003
+    title: "비밀번호 일방향 암호화"
+    description: "복호화 불가능한 해시 저장 (argon2/bcrypt)"
+    law: "안전성확보조치 기준 제7조 2항"
+    severity: critical
+    check_type: code_scan
+    pattern: "createHash\\(['\"]md5|createHash\\(['\"]sha1"
+
+  - id: kr-004
+    title: "고유식별정보 암호화"
+    description: "주민번호, 여권번호 등 AES-256 암호화 저장"
+    law: "안전성확보조치 기준 제7조 3항"
+    severity: critical
+    check_type: manual
+
+  - id: kr-005
+    title: "접속기록 보관"
+    description: "1년(일반) / 2년(5만명↑) 보관, 월 1회 점검"
+    law: "안전성확보조치 기준 제8조"
+    severity: critical
+    check_type: manual
+
+  - id: kr-006
+    title: "외부 접속 2단계 인증"
+    description: "외부 접속 시 OTP/인증서 적용"
+    law: "안전성확보조치 기준 제6조"
+    severity: high
+    check_type: manual
+
+  - id: kr-007
+    title: "거래기록 보존"
+    description: "계약 5년, 결제 5년, 광고 6개월, 분쟁 3년"
+    law: "전자상거래법 제6조"
+    severity: high
+    check_type: manual
+
+  - id: kr-008
+    title: "사업자 정보 표시"
+    description: "상호, 대표자, 주소, 사업자등록번호 표시"
+    law: "전자상거래법 제13조"
+    severity: high
+    check_type: manual
+
+  - id: kr-009
+    title: "유출 신고 체계"
+    description: "1천명 이상 유출 시 72시간 내 KISA 신고"
+    law: "개인정보보호법 제34조"
+    severity: critical
+    check_type: manual
+    penalty: "과징금 전체 매출 3%, 최대 10%"

@@ -1,0 +1,40 @@
+module: us
+name: "USA (CCPA/CPRA)"
+description: "California Consumer Privacy Act / California Privacy Rights Act"
+
+items:
+  - id: us-001
+    title: "Privacy Notice"
+    description: "Disclose categories of data collected and purpose"
+    law: "CCPA §1798.100"
+    severity: critical
+    check_type: manual
+
+  - id: us-002
+    title: "Opt-out Right"
+    description: "Do Not Sell My Personal Information link"
+    law: "CCPA §1798.120"
+    severity: critical
+    check_type: manual
+
+  - id: us-003
+    title: "Data Deletion Request"
+    description: "Honor consumer deletion requests within 45 days"
+    law: "CCPA §1798.105"
+    severity: critical
+    check_type: manual
+
+  - id: us-004
+    title: "Breach Notification"
+    description: "Notify affected consumers without unreasonable delay"
+    law: "CA Civil Code §1798.82"
+    severity: critical
+    check_type: manual
+    penalty: "$100-$750 per consumer per incident (statutory damages)"
+
+  - id: us-005
+    title: "Minors' Consent"
+    description: "Opt-in consent for consumers under 16"
+    law: "CCPA §1798.120(d)"
+    severity: high
+    check_type: manual

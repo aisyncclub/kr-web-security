@@ -163,6 +163,56 @@ const CHECKS: Array<{
       };
     },
   },
+  {
+    id: 'hdr-008',
+    title: 'Server 헤더 정보 노출',
+    header: 'Server',
+    expected: '제거 또는 최소화',
+    owasp: 'A05:2021',
+    check: async (headers) => {
+      const val = headers.get('Server');
+      const detailed = val !== null && /\d+\.\d+/.test(val);
+      return {
+        id: 'hdr-008', title: 'Server 헤더', owasp: 'A05:2021',
+        status: !val ? 'PASS' : detailed ? 'FAIL' : 'WARN',
+        current: val, expected: '제거 또는 버전 숨김',
+      };
+    },
+  },
+  {
+    id: 'hdr-009',
+    title: 'X-Powered-By 제거',
+    header: 'X-Powered-By',
+    expected: '제거',
+    owasp: 'A05:2021',
+    check: async (headers) => {
+      const val = headers.get('X-Powered-By');
+      return {
+        id: 'hdr-009', title: 'X-Powered-By', owasp: 'A05:2021',
+        status: val ? 'FAIL' : 'PASS',
+        current: val, expected: '헤더 제거',
+      };
+    },
+  },
+  {
+    id: 'hdr-010',
+    title: 'CORS 설정',
+    header: 'Access-Control-Allow-Origin',
+    expected: '특정 도메인만 허용',
+    owasp: 'A05:2021',
+    check: async (headers) => {
+      const val = headers.get('Access-Control-Allow-Origin');
+      if (!val) return {
+        id: 'hdr-010', title: 'CORS', owasp: 'A05:2021',
+        status: 'SKIP', current: 'CORS 헤더 없음', expected: '특정 도메인만',
+      };
+      return {
+        id: 'hdr-010', title: 'CORS', owasp: 'A05:2021',
+        status: val === '*' ? 'FAIL' : 'PASS',
+        current: val, expected: '와일드카드(*) 금지',
+      };
+    },
+  },
 ];
 
 async function checkHeaders(url: string): Promise<HeaderCheckResult[]> {
@@ -173,7 +223,7 @@ async function checkHeaders(url: string): Promise<HeaderCheckResult[]> {
   let headers: Headers;
   try {
     const resp = await fetch(url, {
-      headers: { 'User-Agent': 'KR-Web-Security-Check/1.0' },
+      headers: { 'User-Agent': 'WebSecurityCheck/2.0' },
     });
     headers = resp.headers;
   } catch (e: any) {

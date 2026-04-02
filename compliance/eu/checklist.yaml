@@ -1,0 +1,54 @@
+module: eu
+name: "EU (GDPR)"
+description: "General Data Protection Regulation"
+
+items:
+  - id: eu-001
+    title: "Privacy Policy"
+    description: "Clear, accessible privacy policy with lawful basis"
+    law: "GDPR Article 13, 14"
+    severity: critical
+    check_type: manual
+
+  - id: eu-002
+    title: "Consent Management (Opt-in)"
+    description: "Explicit opt-in consent before data collection"
+    law: "GDPR Article 6, 7"
+    severity: critical
+    check_type: manual
+
+  - id: eu-003
+    title: "Right to Erasure"
+    description: "Data deletion upon user request"
+    law: "GDPR Article 17"
+    severity: critical
+    check_type: manual
+
+  - id: eu-004
+    title: "Data Breach Notification"
+    description: "Notify authority within 72 hours of breach"
+    law: "GDPR Article 33"
+    severity: critical
+    check_type: manual
+    penalty: "Up to 4% of annual global turnover or 20M EUR"
+
+  - id: eu-005
+    title: "Data Portability"
+    description: "Provide user data in machine-readable format"
+    law: "GDPR Article 20"
+    severity: high
+    check_type: manual
+
+  - id: eu-006
+    title: "Cookie Consent"
+    description: "Cookie banner with granular consent options"
+    law: "ePrivacy Directive + GDPR"
+    severity: high
+    check_type: manual
+
+  - id: eu-007
+    title: "DPO Appointment"
+    description: "Data Protection Officer for large-scale processing"
+    law: "GDPR Article 37"
+    severity: medium
+    check_type: manual
