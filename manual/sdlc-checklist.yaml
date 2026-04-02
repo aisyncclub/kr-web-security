@@ -1,0 +1,213 @@
+version: "1.0"
+description: "사이트 빌딩 단계별 보안 체크리스트 (Secure SDLC)"
+
+phases:
+  # ─────────────────────────────────────────
+  # Phase 1: 설계 (Design)
+  # ─────────────────────────────────────────
+  - id: design
+    name: "설계 단계"
+    when: "프로젝트 시작 ~ 코딩 전"
+    items:
+      - id: d-001
+        title: "위협 모델링 (Threat Modeling)"
+        description: "STRIDE 모델로 주요 위협 식별"
+        auto: false
+        guide: "데이터 흐름 다이어그램 작성 → 각 구간별 위협 식별"
+
+      - id: d-002
+        title: "인증 설계"
+        description: "인증 방식 결정 (JWT/세션/OAuth), 2FA 여부"
+        auto: false
+
+      - id: d-003
+        title: "데이터 분류"
+        description: "수집할 개인정보 목록, 암호화 대상, 보존 기간 결정"
+        auto: false
+
+      - id: d-004
+        title: "법규 요구사항 식별"
+        description: "대상 국가의 개인정보보호법 확인 (PIPA/GDPR/CCPA)"
+        auto: false
+        compliance: true
+
+      - id: d-005
+        title: "API 설계 보안"
+        description: "인증/인가 체계, Rate Limiting, 입력 검증 규칙 정의"
+        auto: false
+
+  # ─────────────────────────────────────────
+  # Phase 2: 개발 (Development)
+  # ─────────────────────────────────────────
+  - id: development
+    name: "개발 단계"
+    when: "코딩 중"
+    items:
+      - id: dev-001
+        title: "Parameterized Query 사용"
+        description: "SQL 문자열 연결 금지, ORM 또는 prepared statement"
+        auto: true
+        scan_id: "inj-001"
+
+      - id: dev-002
+        title: "입력값 검증"
+        description: "모든 사용자 입력 서버 측 검증 (Zod, Joi 등)"
+        auto: false
+
+      - id: dev-003
+        title: "출력 인코딩"
+        description: "HTML 이스케이프, CSP 적용으로 XSS 방지"
+        auto: true
+        scan_id: "inj-002"
+
+      - id: dev-004
+        title: "비밀번호 해싱"
+        description: "argon2id 또는 bcrypt 사용 (cost 12+)"
+        auto: true
+        scan_id: "cr-001"
+
+      - id: dev-005
+        title: "시크릿 환경변수 관리"
+        description: "API 키, 비밀번호 등 .env 사용, 코드 하드코딩 금지"
+        auto: true
+        scan_id: "cr-005"
+
+      - id: dev-006
+        title: "CSRF 토큰"
+        description: "모든 POST/PUT/DELETE 요청에 CSRF 토큰"
+        auto: true
+        scan_id: "ac-003"
+
+      - id: dev-007
+        title: "파일 업로드 검증"
+        description: "확장자 화이트리스트 + 매직바이트 + 크기 제한"
+        auto: false
+
+      - id: dev-008
+        title: "에러 처리"
+        description: "사용자에게 스택트레이스 미노출, 커스텀 에러 페이지"
+        auto: false
+
+      - id: dev-009
+        title: "로깅 구현"
+        description: "인증 이벤트, 관리자 활동, 데이터 접근 로깅"
+        auto: false
+
+  # ─────────────────────────────────────────
+  # Phase 3: 배포 전 (Pre-Launch)
+  # ─────────────────────────────────────────
+  - id: pre_launch
+    name: "배포 전 점검"
+    when: "런칭 직전"
+    items:
+      - id: pl-001
+        title: "HTTPS 인증서"
+        description: "SSL/TLS 인증서 설치 + HTTP→HTTPS 리다이렉트"
+        auto: true
+        scan_id: "cr-002"
+
+      - id: pl-002
+        title: "보안 헤더 설정"
+        description: "HSTS, CSP, X-Frame-Options 등 설정"
+        auto: true
+        scan_ids: ["hdr-001", "hdr-002", "hdr-003", "hdr-004"]
+
+      - id: pl-003
+        title: "디버그 모드 비활성화"
+        description: "프로덕션에서 디버그/개발 모드 끄기"
+        auto: true
+        check_type: code_scan
+        pattern: "debug\\s*[:=]\\s*true|NODE_ENV.*development|NEXT_PUBLIC_.*DEBUG"
+
+      - id: pl-004
+        title: "기본 계정 제거"
+        description: "admin/admin, test/test 등 기본 계정 삭제"
+        auto: false
+
+      - id: pl-005
+        title: "의존성 취약점 점검"
+        description: "npm audit / bun audit 실행, critical/high 0건"
+        auto: true
+        scan_id: "dep-001"
+
+      - id: pl-006
+        title: "코드 정적 분석"
+        description: "Semgrep 또는 code-scan.ts 실행"
+        auto: true
+
+      - id: pl-007
+        title: "시크릿 스캐닝"
+        description: "gitleaks 또는 trufflehog로 커밋 이력 점검"
+        auto: false
+
+      - id: pl-008
+        title: "에러 페이지 정보 노출"
+        description: "404/500 페이지에 서버 정보, 스택트레이스 미노출"
+        auto: false
+
+      - id: pl-009
+        title: "Server/X-Powered-By 헤더 제거"
+        description: "서버 소프트웨어 정보 비노출"
+        auto: true
+        scan_ids: ["hdr-008", "hdr-009"]
+
+      - id: pl-010
+        title: "CORS 설정 검증"
+        description: "Access-Control-Allow-Origin에 와일드카드 금지"
+        auto: true
+        scan_id: "hdr-010"
+
+      - id: pl-011
+        title: "쿠키 보안 속성"
+        description: "Secure, HttpOnly, SameSite 플래그 확인"
+        auto: true
+        scan_id: "hdr-007"
+
+      - id: pl-012
+        title: "백업 설정"
+        description: "DB + 파일 자동 백업 + 복구 테스트"
+        auto: false
+
+      - id: pl-013
+        title: "개인정보 처리방침"
+        description: "법규에 맞는 처리방침 게시"
+        auto: false
+        compliance: true
+
+  # ─────────────────────────────────────────
+  # Phase 4: 운영 (Operations)
+  # ─────────────────────────────────────────
+  - id: operations
+    name: "운영 단계"
+    when: "런칭 후 상시"
+    items:
+      - id: op-001
+        title: "SSL 인증서 자동 갱신"
+        description: "Let's Encrypt certbot 또는 클라우드 자동 갱신"
+        auto: false
+
+      - id: op-002
+        title: "의존성 정기 업데이트"
+        description: "월 1회 이상 취약점 스캔 + 패치"
+        auto: false
+
+      - id: op-003
+        title: "로그 모니터링"
+        description: "이상 행동 알림 (반복 로그인 실패, 대량 접근)"
+        auto: false
+
+      - id: op-004
+        title: "정기 보안 점검"
+        description: "분기별 /security-check 실행"
+        auto: true
+
+      - id: op-005
+        title: "인시던트 대응 계획"
+        description: "유출 시 신고/통지 절차 수립"
+        auto: false
+        compliance: true
+
+      - id: op-006
+        title: "접근 권한 재검토"
+        description: "퇴직자 계정 비활성화, 권한 최소화 점검"
+        auto: false
