@@ -177,7 +177,7 @@ jobs:
 
 ## About
 
-Built by **[AI싱크클럽](https://github.com/aisyncclub)** — AI + 커머스 실전 커뮤니티
+Built by **[AI싱크클럽](https://litt.ly/aisyncclub)** — AI + 커머스 실전 커뮤니티 | [포트폴리오](https://portfolio.aisyncclub.com/)
 
 ## 라이선스
 

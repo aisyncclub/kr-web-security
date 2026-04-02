@@ -153,7 +153,7 @@ PRs welcome! You can contribute:
 
 ## About
 
-Built by **[AI Sync Club](https://github.com/aisyncclub)** — AI + Commerce community
+Built by **[AI Sync Club](https://litt.ly/aisyncclub)** — AI + Commerce community | [Portfolio](https://portfolio.aisyncclub.com/)
 
 ## License
 
